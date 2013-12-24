@@ -121,8 +121,7 @@ foreach ($ebookPages as $ebookPage) {
 	if ($author->length == 0) {
 		$author = $ebookPageXPath->query('//div[@class="bpright"]/div[@class="author"]');
 	}
-	// print_r($author);
-	// echo "<br />";
+
 	// If authors exist
 	if ($author->length > 0) {
 		// For each author
@@ -154,22 +153,40 @@ try {
 	echo 'Error: ' . $e->getMessage();	//Show exception error
 }
 
-$insertEbook = $cxn->prepare("INSERT INTO $tableName (ebook_isbn, ebook_title, ebook_release, ebook_overview, ebook_authors) VALUES (:ebookIsbn, :ebookTitle, :ebookRelease, :ebookOverview, :ebookAuthors)");	//Preparing INSERT query
+$insertEbook = $cxn->prepare("INSERT INTO $tableName (
+													ebook_isbn,
+													ebook_title,
+													ebook_release,
+													ebook_overview,
+													ebook_authors
+													) VALUES (
+															:ebookIsbn,
+															:ebookTitle,
+															:ebookRelease,
+															:ebookOverview,
+															:ebookAuthors
+															)");	//Preparing INSERT query
+
+//Prepare a statement to check if book exist by his ISBN number
+$countStmt = $cxn->prepare("SELECT COUNT(*) FROM $tableName WHERE ebook_isbn=:ebookIsbn");
 
 //For each ebook in array, add to database
 foreach ($packtEbooks as $ebookIsbn => $ebookDetails) {
 
-	// print_r($ebookDetails);
-	//Executing INSERT query
-	$insertEbook->execute(
-		array(
-			':ebookIsbn' => $ebookIsbn,
-			':ebookTitle' => $ebookDetails['title'],
-			':ebookRelease' => $ebookDetails['release'],
-			':ebookOverview' => $ebookDetails['overview'],
-			':ebookAuthors' => implode(', ', $ebookDetails['authors'])
-			)
-		);
+	$countStmt->execute(array(':ebookIsbn'=>$ebookIsbn));
+
+	if ($countStmt->fetchColumn() == 0) {
+		//Execute INSERT query
+		$insertEbook->execute(
+			array(
+				':ebookIsbn' => $ebookIsbn,
+				':ebookTitle' => $ebookDetails['title'],
+				':ebookRelease' => $ebookDetails['release'],
+				':ebookOverview' => $ebookDetails['overview'],
+				':ebookAuthors' => implode(', ', $ebookDetails['authors'])
+				)
+			);
+	}
 }
 
 $selectEbooks = $cxn->prepare("SELECT * FROM $tableName");	//Preparing SELECT query
