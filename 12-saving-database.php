@@ -66,32 +66,32 @@ function curlMulti($urls) {
 }
 
 
-$cmsEbooksPageUrl = 'http://www.packtpub.com/authors/profiles/dr-zakir-altafhusein-laliwala';	// Assigning cms ebooks page URL to work from
+$ebooksPageUrl = 'http://www.packtpub.com/books';	// Assigning cms ebooks page URL to work from
 
-$cmsEbooksPageSrc = curlGet($cmsEbooksPageUrl);	// Requesting cms ebooks page
+$ebooksPageSrc = curlGet($ebooksPageUrl);	// Requesting cms ebooks page
 
-$cmsEbooksPageXPath = returnXPathObject($cmsEbooksPageSrc);	// Instantiating new XPath DOM object
+$ebooksPageXPath = returnXPathObject($ebooksPageSrc);	// Instantiating new XPath DOM object
 
-$cmsEbooksPagesUrls = $cmsEbooksPageXPath->query('//div[@class="view-content"]/table/tbody/tr/td/div/div[@class="field-content"]/a/@href');	// Querying for href attributes of cms ebooks
+$ebooksPagesUrls = $ebooksPageXPath->query('//div[@class="view-content"]/table/tbody/tr/td/div/div[@class="field-content"]/a/@href');	// Querying for href attributes of cms ebooks
 
 // If cms ebooks exist
-if ($cmsEbooksPagesUrls->length > 0) {
+if ($ebooksPagesUrls->length > 0) {
 	// For each cms ebook page URL
-	for ($i = 0; $i < $cmsEbooksPagesUrls->length; $i++) {
-		$cmsEbooksUrls[] = 'http://www.packtpub.com' . $cmsEbooksPagesUrls->item($i)->nodeValue;	// Adding URL to array
+	for ($i = 0; $i < $ebooksPagesUrls->length; $i++) {
+		$ebooksUrls[] = 'http://www.packtpub.com' . $ebooksPagesUrls->item($i)->nodeValue;	// Adding URL to array
 	}
 }
 
-$uniqueCMSEbooksUrls = array_values(array_unique($cmsEbooksUrls));	// Removing duplicates from array and reindexing
+$uniqueebooksUrls = array_values(array_unique($ebooksUrls));	// Removing duplicates from array and reindexing
 
-$cmsEbookPages = curlMulti($uniqueCMSEbooksUrls);	// Calling curlMulti function and passing array of URLs
+$ebookPages = curlMulti($uniqueebooksUrls);	// Calling curlMulti function and passing array of URLs
 
 // For each cms ebook page
-foreach ($cmsEbookPages as $cmsEbookPage) {
+foreach ($ebookPages as $ebookPage) {
 
-	$ebookIsbn = scrapeBetween($cmsEbookPage, '<b>ISBN : </b>', '<br>');
+	$ebookIsbn = scrapeBetween($ebookPage, '<b>ISBN : </b>', '<br>');
 
-	$ebookPageXPath = returnXPathObject($cmsEbookPage);	// Instantiating new XPath DOM object
+	$ebookPageXPath = returnXPathObject($ebookPage);	// Instantiating new XPath DOM object
 
 	$title = $ebookPageXPath->query('//h1');	// Querying for <h1> (title of ebook)
 
@@ -153,7 +153,7 @@ $insertEbook = $cxn->prepare("INSERT INTO $tableName (ebook_isbn, ebook_title, e
 //For each ebook in array, add to database
 foreach ($packtEbooks as $ebookIsbn => $ebookDetails) {
 
-	//print_r($ebookDetails['authors']);
+	print_r($ebookDetails);
 	//Executing INSERT query
 	$insertEbook->execute(
 		array(
