@@ -173,7 +173,7 @@ $countStmt = $cxn->prepare("SELECT COUNT(*) FROM $tableName WHERE ebook_isbn=:eb
 //For each ebook in array, add to database
 foreach ($packtEbooks as $ebookIsbn => $ebookDetails) {
 
-	$countStmt->execute(array(':ebookIsbn'=>$ebookIsbn));
+	$countStmt->execute(array(':ebookIsbn' => $ebookIsbn));
 
 	if ($countStmt->fetchColumn() == 0) {
 		//Execute INSERT query
