@@ -66,32 +66,32 @@ function curlMulti($urls) {
 }
 
 
-$cmsEbooksPageUrl = 'http://www.packtpub.com/books/cms-and-ecommerce';	// Assigning cms ebooks page URL to work from
+$freeEbooksPageUrl = 'http://www.packtpub.com/books/free-ebooks';	// Assigning free ebooks page URL to work from
 
-$cmsEbooksPageSrc = curlGet($cmsEbooksPageUrl);	// Requesting cms ebooks page
+$freeEbooksPageSrc = curlGet($freeEbooksPageUrl);	// Requesting free ebooks page
 
-$cmsEbooksPageXPath = returnXPathObject($cmsEbooksPageSrc);	// Instantiating new XPath DOM object
+$freeEbooksPageXPath = returnXPathObject($freeEbooksPageSrc);	// Instantiating new XPath DOM object
 
-$cmsEbooksPagesUrls = $cmsEbooksPageXPath->query('//div[@class="view-content"]/table/tbody/tr/td/div/div[@class="field-content"]/a/@href');	// Querying for href attributes of cms ebooks
+$freeEbooksPagesUrls = $freeEbooksPageXPath->query('//div[@class="view-content"]/table/tbody/tr/td/div/div[@class="field-content"]/a/@href');	// Querying for href attributes of free ebooks
 
-// If cms ebooks exist
-if ($cmsEbooksPagesUrls->length > 0) {
-	// For each cms ebook page URL
-	for ($i = 0; $i < $cmsEbooksPagesUrls->length; $i++) {
-		$cmsEbooksUrls[] = 'http://www.packtpub.com' . $cmsEbooksPagesUrls->item($i)->nodeValue;	// Adding URL to array
+// If free ebooks exist
+if ($freeEbooksPagesUrls->length > 0) {
+	// For each free ebook page URL
+	for ($i = 0; $i < $freeEbooksPagesUrls->length; $i++) {
+		$freeEbooksUrls[] = 'http://www.packtpub.com' . $freeEbooksPagesUrls->item($i)->nodeValue;	// Adding URL to array
 	}
 }
 
-$uniqueCMSEbooksUrls = array_values(array_unique($cmsEbooksUrls));	// Removing duplicates from array and reindexing
+$uniqueFreeEbooksUrls = array_values(array_unique($freeEbooksUrls));	// Removing duplicates from array and reindexing
 
-$cmsEbookPages = curlMulti($uniqueCMSEbooksUrls);	// Calling curlMulti function and passing array of URLs
+$freeEbookPages = curlMulti($uniqueFreeEbooksUrls);	// Calling curlMulti function and passing array of URLs
 
-// For each cms ebook page
-foreach ($cmsEbookPages as $cmsEbookPage) {
+// For each free ebook page
+foreach ($freeEbookPages as $freeEbookPage) {
 
-	$ebookIsbn = scrapeBetween($cmsEbookPage, '<b>ISBN : </b>', '<br>');
+	$ebookIsbn = scrapeBetween($freeEbookPage, '<b>ISBN : </b>', '<br>');
 
-	$ebookPageXPath = returnXPathObject($cmsEbookPage);	// Instantiating new XPath DOM object
+	$ebookPageXPath = returnXPathObject($freeEbookPage);	// Instantiating new XPath DOM object
 
 	$title = $ebookPageXPath->query('//h1');	// Querying for <h1> (title of ebook)
 
@@ -133,56 +133,6 @@ foreach ($cmsEbookPages as $cmsEbookPage) {
 	$author = NULL;
 }
 
-$dbUser = 'ebook_scraping';	//Database username
-$dbPass = 'scr4p1ng';	//Database password
-$dbHost = 'localhost';	//Database host
-$dbName = 'ebook_scraping';	//Database name
-
-$tableName = 'ebook';	//Table name to store ebooks
-
-//Try to create a new  database connection
-try {
-	$cxn = new PDO('mysql:host=' . $dbHost . ';dbname=' . $dbName, $dbUser, $dbPass);
-	$cxn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);	//Changing default error mode from PDO::ERRMODE_SILENT to PDO::ERRMODE_EXCEPTION
-} catch(PDOException $e) {
-	echo 'Error: ' . $e->getMessage();	//Show exception error
-}
-
-$insertEbook = $cxn->prepare("INSERT INTO $tableName (ebook_isbn, ebook_title, ebook_release, ebook_overview, ebook_authors) VALUES (:ebookIsbn, :ebookTitle, :ebookRelease, :ebookOverview, :ebookAuthors)");	//Preparing INSERT query
-
-//For each ebook in array, add to database
-foreach ($packtEbooks as $ebookIsbn => $ebookDetails) {
-	//Executing INSERT query
-	$insertEbook->execute(
-		array(
-			':ebookIsbn' => $ebookIsbn,
-			':ebookTitle' => $ebookDetails['title'],
-			':ebookRelease' => $ebookDetails['release'],
-			':ebookOverview' => $ebookDetails['overview'],
-			':ebookAuthors' => implode(', ', $ebookDetails['authors'])
-			)
-		);
-}
-
-$selectEbooks = $cxn->prepare("SELECT * FROM $tableName");	//Preparing SELECT query
-
-$selectEbooks->execute();	//Executing SELECT query
-
-echo '<table><tr><th>ISBN</th><th>Title</th><th>Overview</th><th>Author(s)</th><th>Release Date</th></tr>';	//Opening table and headers
-
-//While there are rows returned, echo table data
-while ($row = $selectEbooks->fetch()) {
-	echo '<tr>';
-
-	echo '<td>' . $row['ebook_isbn'] . '</td>';
-	echo '<td>' . $row['ebook_title'] . '</td>';
-	echo '<td>' . $row['ebook_overview'] . '</td>';
-	echo '<td>' . $row['ebook_authors'] . '</td>';
-	echo '<td>' . $row['ebook_release'] . '</td>';
-
-	echo '</tr>';
-}
-
-echo '</table>';	//Closing Table
+print_r($packtEbooks);
 
 ?>
