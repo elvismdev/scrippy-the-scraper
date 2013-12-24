@@ -117,6 +117,12 @@ foreach ($ebookPages as $ebookPage) {
 
 	$author = $ebookPageXPath->query('//div[@class="bpright"]/div[@class="author"]/a');	// Querying for all authors
 
+	//If author is not inside <a> tag lets check inside the parent <div>
+	if ($author->length == 0) {
+		$author = $ebookPageXPath->query('//div[@class="bpright"]/div[@class="author"]');
+	}
+	// print_r($author);
+	// echo "<br />";
 	// If authors exist
 	if ($author->length > 0) {
 		// For each author
@@ -153,7 +159,7 @@ $insertEbook = $cxn->prepare("INSERT INTO $tableName (ebook_isbn, ebook_title, e
 //For each ebook in array, add to database
 foreach ($packtEbooks as $ebookIsbn => $ebookDetails) {
 
-	print_r($ebookDetails);
+	// print_r($ebookDetails);
 	//Executing INSERT query
 	$insertEbook->execute(
 		array(
