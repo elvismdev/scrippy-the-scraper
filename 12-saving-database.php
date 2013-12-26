@@ -66,7 +66,7 @@ function curlMulti($urls) {
 }
 
 
-$ebooksPageUrl = 'http://www.packtpub.com/books';	// Assigning cms ebooks page URL to work from
+$ebooksPageUrl = 'http://www.packtpub.com/books/cms-and-ecommerce';	// Assigning cms ebooks page URL to work from
 
 $ebooksPageSrc = curlGet($ebooksPageUrl);	// Requesting cms ebooks page
 
@@ -168,14 +168,14 @@ $insertEbook = $cxn->prepare("INSERT INTO $tableName (
 															)");	//Preparing INSERT query
 
 //Prepare a statement to check if book exist by his ISBN number
-$countStmt = $cxn->prepare("SELECT COUNT(*) FROM $tableName WHERE ebook_isbn=:ebookIsbn");
+$bookCheck = $cxn->prepare("SELECT COUNT(*) FROM $tableName WHERE ebook_isbn=:ebookIsbn");
 
 //For each ebook in array, add to database
 foreach ($packtEbooks as $ebookIsbn => $ebookDetails) {
 
-	$countStmt->execute(array(':ebookIsbn' => $ebookIsbn));
+	$bookCheck->execute(array(':ebookIsbn' => $ebookIsbn));
 
-	if ($countStmt->fetchColumn() == 0) {
+	if ($bookCheck->fetchColumn() == 0) {
 		//Execute INSERT query
 		$insertEbook->execute(
 			array(
