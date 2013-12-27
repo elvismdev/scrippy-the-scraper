@@ -9,7 +9,6 @@ class Scrape {
 	public $url;
 	public $source;
 	public $baseUrl;
-	private $baseUrl;
 	private $parseUrl = array();
 
 	//Construct method called on instantation of object
