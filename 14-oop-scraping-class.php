@@ -2,9 +2,7 @@
 
 require_once('scrape.class.php');
 
-$cakePhpBook = new Scrape(
-        'http://www.packtpub.com/cakephp-application-development/book'
-        );	//Instantiating new instance of Scrape class
+$cakePhpBook = new Scrape('http://www.packtpub.com/cakephp-application-development/book');	//Instantiating new instance of Scrape class
 
 $cakePhpBook->title = $cakePhpBook->xPathObj->query(
         '//h1'
